@@ -16,17 +16,53 @@ pacman::p_load(tidyverse, VIM, ggpubr, ggeffects, car, sjPlot,caret, ggrain, emm
 
 ```{r}
 data<-read_csv("G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/1115_barcelonabeta_cognition_v3.csv")%>%
-  dplyr::select(id_bisc, age_12w_m, ethnicity_m_3cat, hospital_delivery, educ_level_m_3cat, sex_0y_c, delivery_type_m_2cat, C_hip, C_pree, C_peeg, C_hel,C_DG , gestage_0y_c_days, )%>%
+  dplyr::select(id_bisc, age_12w_m, ethnicity_m_3cat, hospital_delivery, educ_level_m_3cat, sex_0y_c, delivery_type_m_2cat, C_hip, C_pree, C_peeg, C_hel,C_DG , parity_m)%>%
   rename(subject = id_bisc,
-         age = age_12w_m,
+         age_v1 = age_12w_m,
          ethnicity = ethnicity_m_3cat,
          education = educ_level_m_3cat,
          sex_child = sex_0y_c,
          gestational_diabates = C_DG,
          hellp = C_hel,
          preeclampsia_mild = C_pree,
-         preeclampsia_severe = C_peeg,
-         gest_age_birth = gestage_0y_c_days,
-         )
+         preeclampsia_severe = C_peeg)
+
+write.csv(data, file = "G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/data_cleaned/basic_dataset.csv", row.names = F)
 ```
+
+```{r}
+
+biomarkers_dates<-read_csv("G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/1115_barcelonabeta_cognition_v3.csv")%>%
+  dplyr::select(id_bisc, gestage_0y_c_days, eco_fur_12w_m, bl_date.extr_m_12w, bl_date.extr_m_32w, bl_col.date_m_0y, extraction_date, bl_gest.age.extr_m_12w)%>%
+  rename(subject = id_bisc,
+         gest_age_birth = gestage_0y_c_days,
+         gest_age_v1 = bl_gest.age.extr_m_12w,
+         date_last_period = eco_fur_12w_m,
+         date_v1 = bl_date.extr_m_12w,
+         date_v2 = bl_date.extr_m_32w,
+         date_v3 = bl_col.date_m_0y,
+         date_v4 = extraction_date)%>%
+  mutate(date_v3 = if_else(is.na(date_v3), 
+                         as.Date(date_last_period) + as.numeric(gest_age_birth), 
+                         date_v3),
+         gest_age_v1 = gest_age_v1*7,
+         date_v1 = if_else(is.na(date_v1), 
+                         as.Date(date_last_period) + as.numeric(gest_age_v1), 
+                         date_v1))%>%
+   dplyr::select(-gest_age_v1, -gest_age_birth)%>%
+  pivot_longer(values_to = "Date", names_to = "Visit", cols = c(date_v1, date_v2, date_v3, date_v4))%>%
+  mutate(Visit = parse_number(Visit))
+
+biomarkers<-read_delim("G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/biomarkers_results_BISC.csv", delim = ";")%>%
+  filter(Excluded == "FALSE")%>%
+  dplyr::select(Participant_ID, Visit,Biomarker, Result_numeric, Units)%>%
+  mutate(Result_numeric = gsub(" pg/ml", "", Result_numeric),
+         Result_numeric = as.numeric(gsub(",", ".", Result_numeric)),
+         Visit = as.numeric(parse_number(Visit)))%>%
+  rename(subject = Participant_ID)%>%
+  left_join(., biomarkers_dates, join_by(subject, Visit))
+
+write.csv(biomarkers, file = "G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/data_cleaned/biomarkers.csv", row.names = F)
+```
+
 
