@@ -1,0 +1,32 @@
+---
+title: "BISC_preprocessing"
+author: "Clazz"
+date: "2026-05-11"
+output: html_document
+---
+
+```{r, include = F}
+
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(tidyverse, VIM, ggpubr, ggeffects, car, sjPlot,caret, ggrain, emmeans, skimr, lavaan, patchwork, lme4, lmerTest, gtsummary, huxtable, readxl, broom.mixed, pwrss, mediation)
+
+```
+
+
+```{r}
+data<-read_csv("G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/1115_barcelonabeta_cognition_v3.csv")%>%
+  dplyr::select(id_bisc, age_12w_m, ethnicity_m_3cat, hospital_delivery, educ_level_m_3cat, sex_0y_c, delivery_type_m_2cat, C_hip, C_pree, C_peeg, C_hel,C_DG , gestage_0y_c_days, )%>%
+  rename(subject = id_bisc,
+         age = age_12w_m,
+         ethnicity = ethnicity_m_3cat,
+         education = educ_level_m_3cat,
+         sex_child = sex_0y_c,
+         gestational_diabates = C_DG,
+         hellp = C_hel,
+         preeclampsia_mild = C_pree,
+         preeclampsia_severe = C_peeg,
+         gest_age_birth = gestage_0y_c_days,
+         )
+```
+
