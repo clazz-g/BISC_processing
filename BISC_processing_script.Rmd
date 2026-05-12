@@ -22,10 +22,21 @@ data<-read_csv("G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/1115_barce
          ethnicity = ethnicity_m_3cat,
          education = educ_level_m_3cat,
          sex_child = sex_0y_c,
-         gestational_diabates = C_DG,
+         gestational_diabetes = C_DG,
          hellp = C_hel,
          preeclampsia_mild = C_pree,
-         preeclampsia_severe = C_peeg)
+         preeclampsia_severe = C_peeg,
+         gestational_hypertention = C_hip)%>%
+  mutate(gestational_diabetes = factor(ifelse(gestational_diabetes== "Yes", 1, 0)),
+         gestational_hypertention = factor(ifelse(gestational_hypertention == "Yes", 1, 0)),
+         hellp = factor(ifelse(hellp == "Yes", 1, 0)),
+         preeclampsia_mild = factor(ifelse(preeclampsia_mild== "Yes", 1, 0)),
+         preeclampsia_severe = factor(ifelse(preeclampsia_severe == "Yes", 1, 0)),
+         sex_child = factor(sex_child),
+         hospital_delivery = factor(hospital_delivery),
+         delivery_type_m_2cat = factor(delivery_type_m_2cat),
+         education = factor(education),
+         ethnicity = factor(ethnicity))
 
 write.csv(data, file = "G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/data_cleaned/basic_dataset.csv", row.names = F)
 ```
@@ -33,7 +44,7 @@ write.csv(data, file = "G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/da
 ```{r}
 
 biomarkers_dates<-read_csv("G:/My Drive/Data/BISC/1115_barcelonabeta_cognition_v3/1115_barcelonabeta_cognition_v3.csv")%>%
-  dplyr::select(id_bisc, gestage_0y_c_days, eco_fur_12w_m, bl_date.extr_m_12w, bl_date.extr_m_32w, bl_col.date_m_0y, extraction_date, bl_gest.age.extr_m_12w)%>%
+  dplyr::select(id_bisc, gestage_0y_c_days, eco_fur_12w_m, bl_date.extr_m_12w, bl_date.extr_m_32w, bl_col.date_m_0y, extraction_date, bl_gest.age.extr_m_12w)
   rename(subject = id_bisc,
          gest_age_birth = gestage_0y_c_days,
          gest_age_v1 = bl_gest.age.extr_m_12w,
